@@ -343,10 +343,10 @@ This project is licensed under the MIT License - see the LICENSE file for detail
 
 ## 📞 Support
 
-- Create an issue: [GitHub Issues](https://github.com/yourusername/multimodal-vox-agent/issues)
-- Email: your.email@example.com
-- Documentation: [Wiki](https://github.com/yourusername/multimodal-vox-agent/wiki)
+- Create an issue: [GitHub Issues](https://github.com/ruhul-cse-duet/Multimodal-AI-Agent-Qwen2-pdf-image-STT-TTS/issues)
+- Email: ruhul.cse.duet@gmail.com
+- Documentation: [Wiki](https://github.com/ruhul-cse-duet/Multimodal-AI-Agent-Qwen2-pdf-image-STT-TTS/wiki)
 
 ---
 
-Made with ❤️ by [Your Name]
+Made with ❤️ by [Ruhul Amin](https://www.linkedin.com/in/ruhul-duet-cse)
