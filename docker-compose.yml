@@ -1,0 +1,81 @@
+version: '3.8'
+
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: production
+    container_name: multimodal-vox-agent
+    ports:
+      - "8501:8501"
+    environment:
+      - LLM_STUDIO_API_KEY=${LLM_STUDIO_API_KEY:-lmstudio}
+      - LLM_STUDIO_BASE_URL=${LLM_STUDIO_BASE_URL:-http://host.docker.internal:1234/v1}
+      - LOCAL_LLM_MODEL=${LOCAL_LLM_MODEL:-LiquidAI/LFM2.5-VL-1.6B-GGUF}
+      - EMBEDDING_MODEL=${EMBEDDING_MODEL:-sentence-transformers/all-MiniLM-L6-v2}
+      - VISION_MODEL=${VISION_MODEL:-Salesforce/blip-image-captioning-base}
+      - STT_MODEL=${STT_MODEL:-base}
+      - TTS_MODEL=${TTS_MODEL:-en_US-lessac-medium}
+      - CHROMA_PERSIST_DIR=/app/chroma_db
+      - UPLOAD_DIR=/app/uploads
+      - TEMP_DIR=/app/temp
+      - API_BASE_URL=http://api:8000
+    volumes:
+      - ./chroma_db:/app/chroma_db
+      - ./uploads:/app/uploads
+      - ./temp:/app/temp
+    depends_on:
+      - api
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8501/_stcore/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    networks:
+      - app-network
+
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: production
+    container_name: multimodal-vox-agent-api
+    command: ["uvicorn", "api:app", "--host", "0.0.0.0", "--port", "8000"]
+    ports:
+      - "8000:8000"
+    environment:
+      - LLM_STUDIO_API_KEY=${LLM_STUDIO_API_KEY:-lmstudio}
+      - LLM_STUDIO_BASE_URL=${LLM_STUDIO_BASE_URL:-http://host.docker.internal:1234/v1}
+      - LOCAL_LLM_MODEL=${LOCAL_LLM_MODEL:-LiquidAI/LFM2.5-VL-1.6B-GGUF}
+      - EMBEDDING_MODEL=${EMBEDDING_MODEL:-sentence-transformers/all-MiniLM-L6-v2}
+      - VISION_MODEL=${VISION_MODEL:-Salesforce/blip-image-captioning-base}
+      - STT_MODEL=${STT_MODEL:-base}
+      - TTS_MODEL=${TTS_MODEL:-en_US-lessac-medium}
+      - CHROMA_PERSIST_DIR=/app/chroma_db
+      - UPLOAD_DIR=/app/uploads
+      - TEMP_DIR=/app/temp
+    volumes:
+      - ./chroma_db:/app/chroma_db
+      - ./uploads:/app/uploads
+      - ./temp:/app/temp
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    networks:
+      - app-network
+
+networks:
+  app-network:
+    driver: bridge
+
+volumes:
+  chroma_db:
+  uploads:
+  temp:
