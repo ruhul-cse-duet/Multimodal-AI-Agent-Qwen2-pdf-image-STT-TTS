@@ -6,6 +6,8 @@ frontend/app.py
 import logging
 import os
 from pathlib import Path
+import subprocess
+import time
 
 import requests
 from requests.exceptions import RequestException
@@ -13,6 +15,41 @@ import streamlit as st
 from dotenv import load_dotenv
 
 load_dotenv()
+
+BACKEND_STARTED_FLAG = "backend_started"
+
+def start_backend_if_needed():
+    # Avoid starting multiple times in the same session
+    if st.session_state.get(BACKEND_STARTED_FLAG, False):
+        return
+
+    # If backend already reachable, mark and return
+    try:
+        r = requests.get(api_url("/health"), timeout=1)
+        if r.ok:
+            st.session_state[BACKEND_STARTED_FLAG] = True
+            return
+    except Exception:
+        pass
+
+    # Start backend (adjust path exactly to your file)
+    # Your backend file is backend/main.py -> module path: backend.main:app
+    subprocess.Popen(
+        ["python", "-m", "uvicorn", "backend.main:app", "--host", "127.0.0.1", "--port", "8000"],
+        stdout=subprocess.DEVNULL,
+        stderr=subprocess.STDOUT,
+    )
+
+    # Wait until it becomes healthy
+    for _ in range(40):
+        try:
+            r = requests.get(api_url("/health"), timeout=360)
+            if r.ok:
+                st.session_state[BACKEND_STARTED_FLAG] = True
+                return
+        except Exception:
+            time.sleep(0.5)
+
 
 logging.basicConfig(
     level=logging.INFO,
@@ -43,7 +80,7 @@ def ensure_backend_ready() -> bool:
     backend_ok = check_backend()
     st.session_state.initialized = backend_ok
     if not backend_ok:
-        st.error("Backend not reachable. Start: python -m uvicorn v2.backend.main:app --host 127.0.0.1 --port 8000")
+        st.error("Backend not reachable. Start: python -m uvicorn backend.main:app --host 127.0.0.1 --port 8000")
         return False
     return True
 
@@ -209,8 +246,9 @@ def handle_query(query_text: str, use_speech: bool):
     })
 
 
-initialize_state()
 st.set_page_config(page_title="Multimodal Agent AI", layout="wide")
+start_backend_if_needed()
+initialize_state()
 load_css()
 
 st.title("Multimodal Agent AI ")
