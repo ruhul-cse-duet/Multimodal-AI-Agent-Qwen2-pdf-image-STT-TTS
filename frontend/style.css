@@ -1,0 +1,30 @@
+.main {
+    padding: 0.5rem 1rem;
+}
+.stButton>button {
+    width: 100%;
+}
+.upload-section {
+    background-color: #f0f2f6;
+    padding: 1.5rem;
+    border-radius: 0.5rem;
+    margin-bottom: 1rem;
+}
+.response-box {
+    background-color: #e8f4f8;
+    padding: 1.5rem;
+    border-radius: 0.5rem;
+    border-left: 4px solid #4a90e2;
+}
+.error-box {
+    background-color: #ffe8e8;
+    padding: 1rem;
+    border-radius: 0.5rem;
+    border-left: 4px solid #e74c3c;
+}
+.success-box {
+    background-color: #e8f8f5;
+    padding: 1rem;
+    border-radius: 0.5rem;
+    border-left: 4px solid #27ae60;
+}
