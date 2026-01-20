@@ -23,19 +23,20 @@ sounddevice>=0.5.2
 soundfile>=0.12.1
 pyaudio>=0.2.11
 # LLM and Embeddings
-langchain>=0.3.12
-langchain-community>=0.3.12
-langchain-text-splitters>=0.3.0
-langchain-huggingface>=1.1.0
-sentence-transformers>=5.1.2
+# LangChain ecosystem (aligned)
+langchain==1.2.6
+langchain-core==1.2.7
+langchain-community==0.4.1
+langchain-text-splitters==1.1.0
+langchain-huggingface==1.2.0
+langgraph==1.0.5
+langsmith>=0.3.45,<1.0.0
+
 
 # Vector Store
 chromadb==1.1.1
 faiss-cpu==1.13.1
 
-# Agent Framework
-langgraph==1.0.5
-langsmith==0.1.147
 
 # Utilities
 requests>=2.31.0
