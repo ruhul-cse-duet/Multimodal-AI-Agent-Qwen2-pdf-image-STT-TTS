@@ -1,6 +1,7 @@
 """
 FastAPI backend entrypoint (v2).
 Keeps startup light and loads heavy models lazily on demand.
+backend/main.py
 """
 
 from functools import lru_cache
