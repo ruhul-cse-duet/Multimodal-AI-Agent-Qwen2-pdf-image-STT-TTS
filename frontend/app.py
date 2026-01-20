@@ -16,36 +16,39 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-BACKEND_STARTED_FLAG = "backend_started"
+
+BACKEND_LOG = "/tmp/backend.log"
 
 def start_backend_if_needed():
-    # Avoid starting multiple times in the same session
-    if st.session_state.get(BACKEND_STARTED_FLAG, False):
+    if st.session_state.get("backend_started", False):
         return
 
-    # If backend already reachable, mark and return
+    # already healthy?
     try:
-        r = requests.get(api_url("/health"), timeout=1)
+        r = requests.get(api_url("/health"), timeout=360)
         if r.ok:
-            st.session_state[BACKEND_STARTED_FLAG] = True
+            st.session_state["backend_started"] = True
             return
     except Exception:
         pass
 
-    # Start backend (adjust path exactly to your file)
-    # Your backend file is backend/main.py -> module path: backend.main:app
-    subprocess.Popen(
-        ["python", "-m", "uvicorn", "backend.main:app", "--host", "127.0.0.1", "--port", "8000"],
-        stdout=subprocess.DEVNULL,
-        stderr=subprocess.STDOUT,
+    # start backend and capture logs
+    logf = open(BACKEND_LOG, "a", buffering=1)
+    proc = subprocess.Popen(
+        ["python", "-m", "uvicorn", "backend.main:app", "--host", "127.0.0.1", "--port", "8000", "--log-level", "info"],
+        stdout=logf,
+        stderr=logf,
+        cwd=str(Path(__file__).resolve().parents[1]),  # makes sure repo root-ish
+        env={**os.environ, "PYTHONUNBUFFERED": "1"},
     )
+    st.session_state["backend_pid"] = proc.pid
 
-    # Wait until it becomes healthy
+    # wait for health
     for _ in range(40):
         try:
-            r = requests.get(api_url("/health"), timeout=360)
+            r = requests.get(api_url("/health"), timeout=300)
             if r.ok:
-                st.session_state[BACKEND_STARTED_FLAG] = True
+                st.session_state["backend_started"] = True
                 return
         except Exception:
             time.sleep(0.5)
@@ -261,6 +264,9 @@ with st.sidebar:
         st.success("Backend connected")
     else:
         st.error("Backend not reachable")
+        if not st.session_state.get("initialized", False):
+            if Path(BACKEND_LOG).exists():
+                st.code(Path(BACKEND_LOG).read_text()[-4000:])  # last 4KB
         if st.button("Reconnect Backend", use_container_width=True):
             st.session_state.initialized = check_backend()
             st.rerun()
