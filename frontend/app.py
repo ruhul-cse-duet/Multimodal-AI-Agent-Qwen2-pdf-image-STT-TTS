@@ -1,5 +1,6 @@
 """
-Streamlit frontend (v2) that talks to the FastAPI backend.
+Streamlit frontend that talks to the FastAPI backend.
+frontend/app.py
 """
 
 import logging
